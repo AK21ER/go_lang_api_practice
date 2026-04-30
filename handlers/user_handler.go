@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"go_practice/data"
+	"go_practice/db"
 	"go_practice/models"
 )
 
@@ -103,3 +104,41 @@ func UserByIDHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
 }
+
+func GetUsers(w http.ResponseWriter, r *http.Request, params map[string]string) {
+
+	rows, err := db.DB.Query("SELECT id, name FROM users")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close() // means close the row reading ones we are done with it
+
+	var users []models.User
+
+	for rows.Next() {
+		var u models.User
+		rows.Scan(&u.ID, &u.Name) // “Copy data from current database row into Go variables” and they have comed from teh sql.row 
+		users = append(users, u)
+	}
+
+	json.NewEncoder(w).Encode(users)
+}
+
+
+
+// func getUsers(w http.ResponseWriter, r *http.Request, params map[string]string) {
+// 	fmt.Fprintf(w, "All users")
+// }
+
+// func getUserByID(w http.ResponseWriter, r *http.Request, params map[string]string) {
+// 	fmt.Fprintf(w, "User ID: %s", params["id"])
+// }
+
+// func createUser(w http.ResponseWriter, r *http.Request, params map[string]string) {
+// 	fmt.Fprintf(w, "Create user")
+// }
+
+// func deleteUser(w http.ResponseWriter, r *http.Request, params map[string]string) {
+// 	fmt.Fprintf(w, "Delete user %s", params["id"])
+// }
