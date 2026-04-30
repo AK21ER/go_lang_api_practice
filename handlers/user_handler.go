@@ -105,6 +105,8 @@ func UserByIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+////////////////////////AFTER CONNECTING TO DB////////////////////////
+
 func GetUsers(w http.ResponseWriter, r *http.Request, params map[string]string) {
 
 	rows, err := db.DB.Query("SELECT id, name FROM users")
@@ -126,6 +128,24 @@ func GetUsers(w http.ResponseWriter, r *http.Request, params map[string]string) 
 }
 
 
+
+func RegisterUser(w http.ResponseWriter, r *http.Request, params map[string]string) {
+
+	var user models.User
+	json.NewDecoder(r.Body).Decode(&user)
+
+	err := db.DB.QueryRow(
+		"INSERT INTO users(name) VALUES($1) RETURNING id",
+		user.Name,
+	).Scan(&user.ID)
+
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+}
 
 // func getUsers(w http.ResponseWriter, r *http.Request, params map[string]string) {
 // 	fmt.Fprintf(w, "All users")
