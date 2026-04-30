@@ -1,19 +1,14 @@
-
-
-
-
-
-
 package main
 
 import (
-	"fmt"
-	"net/http"
 	"encoding/json"
-	"go_practice/models"
-     "go_practice/handlers"
-	"go_practice/router"
+	"fmt"
 	"go_practice/db"
+	"go_practice/handlers"
+	"go_practice/middleware"
+	"go_practice/models"
+	"go_practice/router"
+	"net/http"
 )
 
 func main() {
@@ -21,13 +16,15 @@ func main() {
 
 	db.Connect()
 
-	router.GET("/users", handlers.GetUsers)
+	router.GET("/users", func(w http.ResponseWriter, r *http.Request, params map[string]string) {
+		middleware.Auth(handlers.UsersHandler)(w, r)
+	})
+
+	// router.GET("/users", handlers.GetUsers)
 	// router.GET("/users/:id", getUserByID)
 
 	http.ListenAndServe(":3000", http.HandlerFunc(router.Serve))
 }
-
-
 
 func createUser(w http.ResponseWriter, r *http.Request, params map[string]string) {
 
@@ -47,19 +44,6 @@ func createUser(w http.ResponseWriter, r *http.Request, params map[string]string
 	json.NewEncoder(w).Encode(user)
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 // package main
 
 // import (
@@ -68,7 +52,7 @@ func createUser(w http.ResponseWriter, r *http.Request, params map[string]string
 
 // 	"go_practice/data"
 // 	"go_practice/router"
-	
+
 // )
 
 // func main() {
@@ -84,21 +68,6 @@ func createUser(w http.ResponseWriter, r *http.Request, params map[string]string
 
 // 	http.ListenAndServe(":3000", http.HandlerFunc(router.Serve))
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // // package main
 
@@ -126,6 +95,5 @@ func createUser(w http.ResponseWriter, r *http.Request, params map[string]string
 // // 	// Register all routes
 // // 	routes.RegisterUserRoutes()
 
- 
 // // 	http.ListenAndServe(":3000", nil)
 // // }
